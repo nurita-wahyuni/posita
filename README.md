@@ -1,4 +1,3 @@
-```markdown
 # 🏪 Aplikasi POS Konsinyasi UMKM (Web Apps)
 
 Aplikasi manajemen point-of-sales sederhana yang dirancang khusus untuk toko retail yang menerima titipan barang (konsinyasi) dari berbagai UMKM. Aplikasi ini fokus pada pencatatan **Stok Masuk (Pagi)** dan **Stok Keluar (Malam)**, serta perhitungan otomatis keuntungan dan setoran mitra.
