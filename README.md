@@ -64,6 +64,7 @@ Pastikan sudah terinstall:
 ```bash
 git clone https://github.com/belpythons/posita.git
 cd posita
+
 ```
 
 ### 3. Install Dependencies
@@ -83,7 +84,17 @@ Duplikat file `.env.example` dan ubah menjadi `.env`.
 cp .env.example .env
 ```
 
-Buka file `.env` dan sesuaikan koneksi database.
+Buka file `.env` dan sesuaikan koneksi database:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=retailer  # Pastikan buat database ini di phpMyAdmin
+DB_USERNAME=root
+DB_PASSWORD=
+
+```
 
 ### 5. Generate Key & Migrasi
 
