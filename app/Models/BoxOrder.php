@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BoxOrder extends Model
 {
@@ -23,11 +24,27 @@ class BoxOrder extends Model
     ];
 
     /**
-     * Get the template for this order.
+     * Get the template for this order (optional for custom orders).
      */
     public function template(): BelongsTo
     {
         return $this->belongsTo(BoxTemplate::class, 'box_template_id');
+    }
+
+    /**
+     * Get the line items for this order.
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(BoxOrderItem::class);
+    }
+
+    /**
+     * Calculate total from line items.
+     */
+    public function calculateTotalFromItems(): float
+    {
+        return $this->items->sum('subtotal');
     }
 
     /**
@@ -60,6 +77,34 @@ class BoxOrder extends Model
     public function isCancelled(): bool
     {
         return $this->status === 'cancelled';
+    }
+
+    /**
+     * Get time remaining until pickup.
+     */
+    public function getTimeRemainingAttribute(): ?array
+    {
+        if (!$this->pickup_datetime)
+            return null;
+
+        $now = now();
+        $pickup = $this->pickup_datetime;
+
+        if ($pickup->isPast()) {
+            return ['expired' => true, 'text' => 'Sudah lewat'];
+        }
+
+        $diff = $now->diff($pickup);
+
+        return [
+            'expired' => false,
+            'days' => $diff->d,
+            'hours' => $diff->h,
+            'minutes' => $diff->i,
+            'text' => $diff->d > 0
+                ? "{$diff->d} hari {$diff->h} jam"
+                : "{$diff->h} jam {$diff->i} menit"
+        ];
     }
 
     /**

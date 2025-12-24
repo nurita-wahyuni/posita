@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
+use App\Models\BoxOrder;
 use App\Models\BoxTemplate;
 use App\Services\AdminDataService;
 use App\Services\BoxOrderService;
@@ -20,50 +21,47 @@ class BoxOrderController extends Controller
     }
 
     /**
-     * Display box order selection page.
+     * Display box order listing with countdown timers.
      */
     public function index(): Response
     {
-        $templates = $this->adminDataService->getBoxTemplates();
-
-        // Separate by type
-        $heavyMealTemplates = $templates->where('type', 'heavy_meal')->where('is_active', true)->values();
-        $snackBoxTemplates = $templates->where('type', 'snack_box')->where('is_active', true)->values();
-
-        // Get today's orders
+        $upcomingOrders = $this->boxOrderService->getUpcomingOrders();
         $todayOrders = $this->boxOrderService->getTodayOrders();
 
+        // Add time remaining to each order
+        $upcomingOrders = $upcomingOrders->map(function ($order) {
+            $order->time_remaining = $order->getTimeRemainingAttribute();
+            return $order;
+        });
+
         return Inertia::render('Pos/Box/Index', [
-            'heavyMealTemplates' => $heavyMealTemplates,
-            'snackBoxTemplates' => $snackBoxTemplates,
+            'upcomingOrders' => $upcomingOrders,
             'todayOrders' => $todayOrders,
         ]);
     }
 
     /**
-     * Show form to create a new order for a template.
+     * Show form to create a new order (flexible line items).
      */
-    public function create(BoxTemplate $template): Response
+    public function create(BoxTemplate $template = null): Response
     {
-        if (!$template->is_active) {
-            abort(404, 'Template tidak aktif.');
-        }
-
         return Inertia::render('Pos/Box/Create', [
             'selectedTemplate' => $template,
         ]);
     }
 
     /**
-     * Store a new box order.
+     * Store a new box order with flexible line items.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'box_template_id' => 'required|exists:box_templates,id',
             'customer_name' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:1',
             'pickup_datetime' => 'required|date|after:now',
+            'items' => 'required|array|min:1',
+            'items.*.product_name' => 'required|string|max:255',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
         try {
@@ -88,7 +86,7 @@ class BoxOrderController extends Controller
             'payment_proof' => 'required|image|max:5120', // 5MB max
         ]);
 
-        $order = \App\Models\BoxOrder::findOrFail($orderId);
+        $order = BoxOrder::findOrFail($orderId);
 
         try {
             $this->boxOrderService->uploadPaymentProof($order, $request->file('payment_proof'));
@@ -112,7 +110,7 @@ class BoxOrderController extends Controller
             'status' => 'required|in:pending,paid,completed,cancelled',
         ]);
 
-        $order = \App\Models\BoxOrder::findOrFail($orderId);
+        $order = BoxOrder::findOrFail($orderId);
 
         try {
             $this->boxOrderService->updateOrderStatus($order, $validated['status']);
@@ -125,5 +123,13 @@ class BoxOrderController extends Controller
                 ->back()
                 ->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Download receipt PDF for an order.
+     */
+    public function downloadReceipt(BoxOrder $order)
+    {
+        return $this->boxOrderService->generateReceipt($order);
     }
 }
