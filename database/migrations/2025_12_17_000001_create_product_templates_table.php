@@ -14,9 +14,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('partner_id')->constrained('partners')->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('base_price', 10, 2);
-            $table->integer('default_markup_percent');
+            $table->decimal('base_price', 12, 2);
+            $table->integer('default_markup_percent')->default(10); // 5, 10, or 15
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->index('partner_id');
+            $table->index('is_active');
         });
     }
 
