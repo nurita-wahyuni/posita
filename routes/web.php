@@ -13,14 +13,9 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 
-// Welcome page
+// Redirect root to login
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
 
 // General authenticated routes
@@ -49,6 +44,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Dashboard
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
+    // Reports
+    Route::get('/reports/daily', [Admin\DashboardController::class, 'downloadDailyReport'])->name('reports.daily');
+    Route::get('/reports/session/{session}', [Admin\DashboardController::class, 'downloadSessionReport'])->name('reports.session');
+
     // Partners CRUD
     Route::resource('partners', Admin\PartnerController::class);
 
@@ -70,6 +69,7 @@ Route::middleware(['auth', 'role:employee'])->prefix('pos')->name('pos.')->group
     Route::post('/open', [Pos\ShopSessionController::class, 'store'])->name('session.store');
     Route::get('/close', [Pos\ShopSessionController::class, 'showClose'])->name('session.close');
     Route::post('/close', [Pos\ShopSessionController::class, 'close'])->name('session.close.store');
+    Route::get('/report/{session}', [Pos\ShopSessionController::class, 'downloadReport'])->name('session.report');
 
     // Consignment Management
     Route::get('/consignment', [Pos\ConsignmentController::class, 'index'])->name('consignment.index');
@@ -79,10 +79,11 @@ Route::middleware(['auth', 'role:employee'])->prefix('pos')->name('pos.')->group
 
     // Box Order (Fitur Amar)
     Route::get('/box', [Pos\BoxOrderController::class, 'index'])->name('box.index');
-    Route::get('/box/create/{template}', [Pos\BoxOrderController::class, 'create'])->name('box.create');
+    Route::get('/box/create/{template?}', [Pos\BoxOrderController::class, 'create'])->name('box.create');
     Route::post('/box', [Pos\BoxOrderController::class, 'store'])->name('box.store');
     Route::post('/box/{order}/proof', [Pos\BoxOrderController::class, 'uploadProof'])->name('box.proof');
     Route::patch('/box/{order}/status', [Pos\BoxOrderController::class, 'updateStatus'])->name('box.status');
+    Route::get('/box/{order}/receipt', [Pos\BoxOrderController::class, 'downloadReceipt'])->name('box.receipt');
 });
 
 require __DIR__ . '/auth.php';
