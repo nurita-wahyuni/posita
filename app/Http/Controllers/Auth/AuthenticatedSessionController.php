@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\AuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,11 @@ use Inertia\Response;
 
 class AuthenticatedSessionController extends Controller
 {
+    public function __construct(
+        protected AuthService $authService
+    ) {
+    }
+
     /**
      * Display the login view.
      */
@@ -31,21 +37,26 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        if ($request->user()->role === 'super_admin') {
-            Auth::guard('web')->logout();
+        $user = $request->user();
 
+        // Check if user is active
+        if (!$user->is_active) {
+            Auth::guard('web')->logout();
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'email' => 'Super Admins must login via /admin.',
+                'email' => 'Akun Anda tidak aktif. Hubungi admin.',
             ]);
         }
 
         $request->session()->regenerate();
 
         activity('auth')
-            ->causedBy($request->user())
+            ->causedBy($user)
             ->log('logged in');
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Role-based redirect
+        $redirectPath = $this->authService->getRedirectPath($user);
+
+        return redirect()->intended($redirectPath);
     }
 
     /**
@@ -53,10 +64,17 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user) {
+            activity('auth')
+                ->causedBy($user)
+                ->log('logged out');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');
