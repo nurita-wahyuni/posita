@@ -61,7 +61,7 @@ class AuthService
     {
         return match ($user->role) {
             'admin' => '/admin',
-            'employee' => '/pos',
+            'employee' => '/pos/open',
             default => '/dashboard',
         };
     }

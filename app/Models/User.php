@@ -2,24 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
-
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, \Spatie\Activitylog\Traits\LogsActivity;
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->role === 'super_admin' && $panel->getId() === 'admin';
-    }
+    use HasFactory, Notifiable, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +23,7 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -53,14 +46,31 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
-    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    public function getActivitylogOptions(): LogOptions
     {
-        return \Spatie\Activitylog\LogOptions::defaults()
+        return LogOptions::defaults()
             ->logOnly(['*'])
             ->logOnlyDirty();
+    }
+
+    /**
+     * Check if user is admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is employee.
+     */
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
     }
 
     /**
@@ -71,4 +81,3 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(ShopSession::class);
     }
 }
-

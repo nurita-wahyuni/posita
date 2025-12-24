@@ -3,35 +3,62 @@
 namespace App\Services;
 
 use App\Models\BoxOrder;
+use App\Models\BoxOrderItem;
 use App\Models\BoxTemplate;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class BoxOrderService
 {
     /**
-     * Create a new box order.
+     * Create a new box order with flexible line items.
      */
     public function createOrder(array $data): BoxOrder
     {
-        $template = BoxTemplate::findOrFail($data['box_template_id']);
+        return DB::transaction(function () use ($data) {
+            $totalPrice = 0;
 
-        if (!$template->is_active) {
-            throw new \Exception('Template box ini sudah tidak aktif.');
-        }
+            // Calculate total from items
+            if (!empty($data['items'])) {
+                foreach ($data['items'] as $item) {
+                    $totalPrice += $item['quantity'] * $item['unit_price'];
+                }
+            } elseif (!empty($data['box_template_id'])) {
+                // Fallback to template-based pricing
+                $template = BoxTemplate::findOrFail($data['box_template_id']);
+                if (!$template->is_active) {
+                    throw new \Exception('Template box ini sudah tidak aktif.');
+                }
+                $totalPrice = $template->price * ($data['quantity'] ?? 1);
+            }
 
-        $quantity = (int) $data['quantity'];
-        $totalPrice = $template->price * $quantity;
+            $order = BoxOrder::create([
+                'customer_name' => $data['customer_name'],
+                'box_template_id' => $data['box_template_id'] ?? null,
+                'quantity' => $data['quantity'] ?? 1,
+                'total_price' => $data['total_price'] ?? $totalPrice,
+                'pickup_datetime' => $data['pickup_datetime'],
+                'status' => 'pending',
+            ]);
 
-        return BoxOrder::create([
-            'customer_name' => $data['customer_name'],
-            'box_template_id' => $template->id,
-            'quantity' => $quantity,
-            'total_price' => $data['total_price'] ?? $totalPrice,
-            'pickup_datetime' => $data['pickup_datetime'],
-            'status' => 'pending',
-        ]);
+            // Create line items
+            if (!empty($data['items'])) {
+                foreach ($data['items'] as $itemData) {
+                    $subtotal = $itemData['quantity'] * $itemData['unit_price'];
+                    $order->items()->create([
+                        'product_name' => $itemData['product_name'],
+                        'quantity' => $itemData['quantity'],
+                        'unit_price' => $itemData['unit_price'],
+                        'subtotal' => $subtotal,
+                    ]);
+                }
+            }
+
+            return $order->load('items');
+        });
     }
 
     /**
@@ -59,7 +86,7 @@ class BoxOrderService
      */
     public function getOrders(array $filters = []): Collection
     {
-        $query = BoxOrder::with('template');
+        $query = BoxOrder::with(['template', 'items']);
 
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -86,7 +113,7 @@ class BoxOrderService
     public function getPendingOrders(): Collection
     {
         return BoxOrder::pending()
-            ->with('template')
+            ->with(['template', 'items'])
             ->orderBy('pickup_datetime', 'asc')
             ->get();
     }
@@ -97,7 +124,18 @@ class BoxOrderService
     public function getTodayOrders(): Collection
     {
         return BoxOrder::today()
-            ->with('template')
+            ->with(['template', 'items'])
+            ->orderBy('pickup_datetime', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get upcoming orders (next 7 days).
+     */
+    public function getUpcomingOrders(): Collection
+    {
+        return BoxOrder::whereBetween('pickup_datetime', [now(), now()->addDays(7)])
+            ->with(['template', 'items'])
             ->orderBy('pickup_datetime', 'asc')
             ->get();
     }
@@ -140,6 +178,22 @@ class BoxOrderService
         }
 
         return $this->updateOrderStatus($order, 'completed');
+    }
+
+    /**
+     * Generate receipt PDF for an order.
+     */
+    public function generateReceipt(BoxOrder $order)
+    {
+        $order->load(['template', 'items']);
+
+        $data = [
+            'order' => $order,
+            'generated_at' => now(),
+        ];
+
+        return Pdf::loadView('reports.box-receipt', $data)
+            ->stream('kwitansi-' . $order->id . '.pdf');
     }
 
     /**
