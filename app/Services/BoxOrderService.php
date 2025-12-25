@@ -19,12 +19,13 @@ class BoxOrderService
     public function createOrder(array $data): BoxOrder
     {
         return DB::transaction(function () use ($data) {
-            $totalPrice = 0;
+            $boxQuantity = $data['quantity'] ?? 1;
+            $itemsSubtotal = 0;
 
-            // Calculate total from items
+            // Calculate subtotal from items (per box)
             if (!empty($data['items'])) {
                 foreach ($data['items'] as $item) {
-                    $totalPrice += $item['quantity'] * $item['unit_price'];
+                    $itemsSubtotal += $item['quantity'] * $item['unit_price'];
                 }
             } elseif (!empty($data['box_template_id'])) {
                 // Fallback to template-based pricing
@@ -32,13 +33,16 @@ class BoxOrderService
                 if (!$template->is_active) {
                     throw new \Exception('Template box ini sudah tidak aktif.');
                 }
-                $totalPrice = $template->price * ($data['quantity'] ?? 1);
+                $itemsSubtotal = $template->price;
             }
+
+            // Total price = items subtotal × box quantity
+            $totalPrice = $itemsSubtotal * $boxQuantity;
 
             $order = BoxOrder::create([
                 'customer_name' => $data['customer_name'],
                 'box_template_id' => $data['box_template_id'] ?? null,
-                'quantity' => $data['quantity'] ?? 1,
+                'quantity' => $boxQuantity,
                 'total_price' => $data['total_price'] ?? $totalPrice,
                 'pickup_datetime' => $data['pickup_datetime'],
                 'status' => 'pending',

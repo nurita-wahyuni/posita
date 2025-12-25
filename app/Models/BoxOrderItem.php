@@ -5,6 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $box_order_id
+ * @property string $product_name
+ * @property int $quantity
+ * @property string $unit_price
+ * @property string $subtotal
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class BoxOrderItem extends Model
 {
     protected $fillable = [
