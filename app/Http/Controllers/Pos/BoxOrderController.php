@@ -45,8 +45,12 @@ class BoxOrderController extends Controller
      */
     public function create(BoxTemplate $template = null): Response
     {
+        // Get all active box templates for dropdown
+        $boxTemplates = $this->adminDataService->getBoxTemplates();
+
         return Inertia::render('Pos/Box/Create', [
             'selectedTemplate' => $template,
+            'boxTemplates' => $boxTemplates,
         ]);
     }
 
@@ -58,6 +62,7 @@ class BoxOrderController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'pickup_datetime' => 'required|date|after:now',
+            'quantity' => 'required|integer|min:1',
             'items' => 'required|array|min:1',
             'items.*.product_name' => 'required|string|max:255',
             'items.*.quantity' => 'required|integer|min:1',

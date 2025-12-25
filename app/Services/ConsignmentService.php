@@ -53,6 +53,33 @@ class ConsignmentService
     }
 
     /**
+     * Update sold quantity for a consignment item.
+     * Calculates qty_remaining = qty_initial - qty_sold
+     */
+    public function updateSoldQuantity(DailyConsignment $consignment, int $qtySold): DailyConsignment
+    {
+        // Validate qty_sold doesn't exceed qty_initial
+        if ($qtySold > $consignment->qty_initial) {
+            throw new \Exception('Jumlah terjual tidak boleh melebihi stok awal.');
+        }
+
+        if ($qtySold < 0) {
+            throw new \Exception('Jumlah terjual tidak boleh negatif.');
+        }
+
+        $qtyRemaining = $consignment->qty_initial - $qtySold;
+        $subtotalIncome = $qtySold * $consignment->selling_price;
+
+        $consignment->update([
+            'qty_sold' => $qtySold,
+            'qty_remaining' => $qtyRemaining,
+            'subtotal_income' => $subtotalIncome,
+        ]);
+
+        return $consignment->fresh();
+    }
+
+    /**
      * Update remaining quantity for a consignment item during close shop.
      * Calculates qty_sold = qty_initial - qty_remaining
      */
@@ -77,6 +104,23 @@ class ConsignmentService
         ]);
 
         return $consignment->fresh();
+    }
+
+    /**
+     * Bulk update sold quantities.
+     */
+    public function bulkUpdateSoldQuantities(array $items): array
+    {
+        $results = [];
+
+        foreach ($items as $item) {
+            $consignment = DailyConsignment::find($item['id']);
+            if ($consignment) {
+                $results[] = $this->updateSoldQuantity($consignment, (int) $item['qty_sold']);
+            }
+        }
+
+        return $results;
     }
 
     /**
