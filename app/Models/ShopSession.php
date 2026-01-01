@@ -1,5 +1,5 @@
 <?php
-
+//Nurita Wahyuni | 202312061
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
