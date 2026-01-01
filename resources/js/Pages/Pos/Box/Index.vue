@@ -1,8 +1,29 @@
+<!-- Rivaldi | 202312050 -->
 <script setup>
 import EmployeeLayout from '@/Layouts/EmployeeLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { formatMoney } from '@/utils/formatMoney';
+
+// Heroicons imports
+import {
+    PlusIcon,
+    ClockIcon,
+    ArchiveBoxIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    CurrencyDollarIcon,
+    ExclamationCircleIcon,
+    DocumentTextIcon,
+    PhotoIcon,
+    ArrowUpTrayIcon,
+    PencilSquareIcon,
+    ChevronDownIcon,
+    BellAlertIcon,
+    SparklesIcon
+} from '@heroicons/vue/24/outline';
+import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     upcomingOrders: {
@@ -101,12 +122,12 @@ onUnmounted(() => {
 
 const getStatusBadge = (status) => {
     const badges = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        paid: 'bg-green-100 text-green-800',
-        completed: 'bg-blue-100 text-blue-800',
-        cancelled: 'bg-red-100 text-red-800',
+        pending: 'bg-amber-50 text-amber-700 border-amber-200',
+        paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        completed: 'bg-sky-50 text-sky-700 border-sky-200',
+        cancelled: 'bg-red-50 text-red-700 border-red-200',
     };
-    return badges[status] || 'bg-gray-100 text-gray-800';
+    return badges[status] || 'bg-gray-50 text-gray-700 border-gray-200';
 };
 
 const getStatusText = (status) => {
@@ -193,10 +214,10 @@ const submitStatusChange = () => {
 
 // Available status options
 const statusOptions = [
-    { value: 'pending', label: 'Menunggu', icon: '⏳', description: 'Order belum dibayar' },
-    { value: 'paid', label: 'Lunas', icon: '💰', description: 'Pembayaran sudah diterima' },
-    { value: 'completed', label: 'Selesai', icon: '✅', description: 'Order sudah diambil' },
-    { value: 'cancelled', label: 'Batal', icon: '❌', description: 'Order dibatalkan' },
+    { value: 'pending', label: 'Menunggu', icon: 'clock', description: 'Order belum dibayar' },
+    { value: 'paid', label: 'Lunas', icon: 'currency', description: 'Pembayaran sudah diterima' },
+    { value: 'completed', label: 'Selesai', icon: 'check', description: 'Order sudah diambil' },
+    { value: 'cancelled', label: 'Batal', icon: 'x', description: 'Order dibatalkan' },
 ];
 </script>
 
@@ -205,167 +226,241 @@ const statusOptions = [
 
     <EmployeeLayout>
         <template #header>
-            <h2 class="text-lg font-semibold text-gray-800">Order Box</h2>
+            <div class="flex items-center gap-2">
+                <ArchiveBoxIcon class="w-6 h-6 text-gray-600" />
+                <h2 class="text-lg font-semibold text-gray-800">Order Box</h2>
+            </div>
         </template>
 
-        <div class="space-y-6">
+        <!-- Main Container with Fixed Height - No Page Scroll -->
+        <div class="h-[calc(100vh-180px)] lg:h-[calc(100vh-130px)] flex flex-col gap-3 overflow-hidden">
             <!-- Create New Order Button -->
             <Link
                 href="/pos/box/create"
-                class="block w-full bg-green-600 text-white py-3 rounded-lg font-medium text-center hover:bg-green-700"
+                class="flex-shrink-0 flex items-center justify-center gap-2 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white py-4 rounded-2xl font-semibold text-center shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.01] transition-all duration-300 group"
             >
-                + Buat Order Baru
+                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                    <PlusIcon class="w-5 h-5" />
+                </div>
+                <span class="text-lg">Buat Order Baru</span>
             </Link>
 
-            <!-- Countdown Widget -->
-            <div v-if="upcomingOrders.length > 0" class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
-                <h3 class="font-semibold mb-3">⏰ Order Mendatang</h3>
-                <div class="space-y-2">
-                    <div
-                        v-for="order in upcomingOrders.slice(0, 3)"
-                        :key="order.id"
-                        class="bg-white bg-opacity-20 rounded-lg p-3 flex justify-between items-center"
-                    >
-                        <div>
-                            <p class="font-medium">{{ order.customer_name }}</p>
-                            <p class="text-sm opacity-80">{{ order.items?.length || 1 }} item</p>
+            <!-- Two Column Layout -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
+                <!-- Left Column: Countdown + Today Orders -->
+                <div class="flex flex-col gap-4 min-h-0">
+                    <!-- Countdown Widget -->
+                    <div v-if="upcomingOrders.length > 0" class="flex-shrink-0 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl shadow-xl shadow-purple-500/20 overflow-hidden">
+                        <div class="px-5 py-4 flex items-center gap-3 border-b border-white/10">
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <ClockIcon class="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Countdown Terdekat</h3>
+                                <p class="text-white/70 text-xs">{{ upcomingOrders.length }} order mendatang</p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p 
-                                class="font-bold text-lg"
-                                :class="countdowns[order.id]?.expired ? 'text-red-300' : ''"
+                        <div class="p-4 max-h-48 overflow-y-auto custom-scrollbar space-y-2">
+                            <div
+                                v-for="order in upcomingOrders.slice(0, 5)"
+                                :key="order.id"
+                                class="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex justify-between items-center hover:bg-white/20 transition-colors cursor-pointer"
+                                @click="openStatusModal(order)"
                             >
-                                {{ countdowns[order.id]?.text || '...' }}
-                            </p>
-                            <p class="text-xs opacity-80">
-                                {{ new Date(order.pickup_datetime).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Today's Orders -->
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-4 py-3 border-b">
-                    <h3 class="font-semibold text-gray-800">📦 Pengambilan Hari Ini</h3>
-                </div>
-                <div class="p-4">
-                    <div v-if="todayOrders.length === 0" class="text-center py-8 text-gray-500">
-                        Tidak ada order untuk hari ini
-                    </div>
-                    <div v-else class="space-y-3">
-                        <div
-                            v-for="order in todayOrders"
-                            :key="order.id"
-                            class="border rounded-lg p-4"
-                        >
-                            <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <p class="font-medium">{{ order.customer_name }}</p>
-                                    <p class="text-sm text-gray-500">
-                                        {{ new Date(order.pickup_datetime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
-                                    </p>
-                                </div>
-                                <button
-                                    @click="openStatusModal(order)"
-                                    :class="['px-2 py-1 text-xs rounded-full cursor-pointer hover:opacity-80 transition', getStatusBadge(order.status)]"
-                                >
-                                    {{ getStatusText(order.status) }} ▾
-                                </button>
-                            </div>
-                            
-                            <!-- Order Items -->
-                            <div v-if="order.items?.length > 0" class="mb-2 text-sm text-gray-600">
-                                <div v-for="item in order.items" :key="item.id" class="flex justify-between">
-                                    <span>{{ item.product_name }} x{{ item.quantity }}</span>
-                                    <span>{{ formatMoney(item.subtotal) }}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Cancellation Reason -->
-                            <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-2 p-2 bg-red-50 rounded text-sm text-red-700">
-                                <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
-                            </div>
-                            
-                            <div class="flex justify-between items-center pt-2 border-t">
-                                <span class="font-bold text-green-600">{{ formatMoney(order.total_price) }}</span>
-                                <a
-                                    :href="`/pos/box/${order.id}/receipt`"
-                                    target="_blank"
-                                    class="text-sm text-blue-600 hover:text-blue-800"
-                                >
-                                    📄 Kwitansi
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- All Upcoming Orders -->
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-4 py-3 border-b">
-                    <h3 class="font-semibold text-gray-800">📅 Order Mendatang</h3>
-                </div>
-                <div class="p-4">
-                    <div v-if="upcomingOrders.length === 0" class="text-center py-8 text-gray-500">
-                        Tidak ada order mendatang
-                    </div>
-                    <div v-else class="space-y-3">
-                        <div
-                            v-for="order in upcomingOrders"
-                            :key="order.id"
-                            class="border rounded-lg p-4"
-                        >
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <p class="font-medium">{{ order.customer_name }}</p>
-                                    <p class="text-sm text-gray-500">
-                                        {{ new Date(order.pickup_datetime).toLocaleString('id-ID', { 
-                                            weekday: 'long', 
-                                            day: 'numeric', 
-                                            month: 'long',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        }) }}
-                                    </p>
+                                    <p class="font-semibold text-white">{{ order.customer_name }}</p>
+                                    <p class="text-sm text-white/70">{{ order.items?.length || 1 }} item</p>
                                 </div>
                                 <div class="text-right">
-                                    <button
-                                        @click="openStatusModal(order)"
-                                        :class="['px-2 py-1 text-xs rounded-full cursor-pointer hover:opacity-80 transition', getStatusBadge(order.status)]"
-                                    >
-                                        {{ getStatusText(order.status) }} ▾
-                                    </button>
                                     <p 
-                                        class="text-sm font-medium mt-1"
-                                        :class="countdowns[order.id]?.expired ? 'text-red-600' : 'text-blue-600'"
+                                        class="font-bold text-xl"
+                                        :class="countdowns[order.id]?.expired ? 'text-red-300' : 'text-white'"
                                     >
                                         {{ countdowns[order.id]?.text || '...' }}
                                     </p>
+                                    <p class="text-xs text-white/70">
+                                        {{ new Date(order.pickup_datetime).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) }}
+                                    </p>
                                 </div>
                             </div>
-                            
-                            <!-- Order Items Summary -->
-                            <div v-if="order.items?.length > 0" class="mb-2 text-sm text-gray-600">
-                                {{ order.items.map(i => i.product_name).join(', ') }}
+                        </div>
+                    </div>
+
+                    <!-- Today's Orders -->
+                    <div class="flex-1 min-h-0 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col overflow-hidden">
+                        <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                        <ArchiveBoxIcon class="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800">Pengambilan Hari Ini</h3>
+                                        <p class="text-xs text-gray-500">{{ todayOrders.length }} order</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
+                                    Today
+                                </span>
                             </div>
-                            
-                            <!-- Cancellation Reason -->
-                            <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-2 p-2 bg-red-50 rounded text-sm text-red-700">
-                                <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+                            <div v-if="todayOrders.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400">
+                                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                    <ArchiveBoxIcon class="w-10 h-10 opacity-50" />
+                                </div>
+                                <p class="font-medium">Tidak ada order hari ini</p>
+                                <p class="text-sm text-gray-400">Semua order sudah selesai!</p>
                             </div>
-                            
-                            <div class="flex justify-between items-center pt-2 border-t">
-                                <span class="font-bold text-green-600">{{ formatMoney(order.total_price) }}</span>
-                                <a
-                                    :href="`/pos/box/${order.id}/receipt`"
-                                    target="_blank"
-                                    class="text-sm text-blue-600 hover:text-blue-800"
+                            <div v-else class="space-y-3">
+                                <div
+                                    v-for="order in todayOrders"
+                                    :key="order.id"
+                                    class="group bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-4 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-0.5 transition-all duration-300"
                                 >
-                                    📄 Kwitansi
-                                </a>
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <p class="font-bold text-gray-800">{{ order.customer_name }}</p>
+                                            <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+                                                <ClockIcon class="w-4 h-4" />
+                                                {{ new Date(order.pickup_datetime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
+                                            </p>
+                                        </div>
+                                        <button
+                                            @click="openStatusModal(order)"
+                                            :class="['inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border cursor-pointer hover:scale-105 transition-all duration-200', getStatusBadge(order.status)]"
+                                        >
+                                            <component 
+                                                :is="order.status === 'completed' ? CheckCircleIcon : order.status === 'cancelled' ? XCircleIcon : order.status === 'paid' ? CurrencyDollarIcon : ClockIcon" 
+                                                class="w-3.5 h-3.5" 
+                                            />
+                                            {{ getStatusText(order.status) }}
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Order Items -->
+                                    <div v-if="order.items?.length > 0" class="mb-3 space-y-1 text-sm">
+                                        <div v-for="item in order.items" :key="item.id" class="flex justify-between text-gray-600">
+                                            <span>{{ item.product_name }} × {{ item.quantity }}</span>
+                                            <span class="font-medium">{{ formatMoney(item.subtotal) }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Cancellation Reason -->
+                                    <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
+                                        <ExclamationCircleIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                                        <span class="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{{ formatMoney(order.total_price) }}</span>
+                                        <a
+                                            :href="`/pos/box/${order.id}/receipt`"
+                                            target="_blank"
+                                            class="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
+                                        >
+                                            <DocumentTextIcon class="w-4 h-4" />
+                                            Kwitansi
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Upcoming Orders -->
+                <div class="min-h-0 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col overflow-hidden">
+                    <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                                    <CalendarDaysIcon class="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Order Mendatang</h3>
+                                    <p class="text-xs text-gray-500">{{ upcomingOrders.length }} order</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                                Upcoming
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+                        <div v-if="upcomingOrders.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <CalendarDaysIcon class="w-10 h-10 opacity-50" />
+                            </div>
+                            <p class="font-medium">Tidak ada order mendatang</p>
+                            <p class="text-sm text-gray-400">Buat order baru untuk memulai!</p>
+                        </div>
+                        <div v-else class="space-y-3">
+                            <div
+                                v-for="order in upcomingOrders"
+                                :key="order.id"
+                                class="group bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-4 hover:shadow-lg hover:border-indigo-200 hover:-translate-y-0.5 transition-all duration-300"
+                            >
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-gray-800 truncate">{{ order.customer_name }}</p>
+                                        <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+                                            <CalendarDaysIcon class="w-4 h-4 flex-shrink-0" />
+                                            <span class="truncate">{{ new Date(order.pickup_datetime).toLocaleString('id-ID', { 
+                                                weekday: 'short', 
+                                                day: 'numeric', 
+                                                month: 'short',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0 ml-3">
+                                        <button
+                                            @click="openStatusModal(order)"
+                                            :class="['inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border cursor-pointer hover:scale-105 transition-all duration-200', getStatusBadge(order.status)]"
+                                        >
+                                            <component 
+                                                :is="order.status === 'completed' ? CheckCircleIcon : order.status === 'cancelled' ? XCircleIcon : order.status === 'paid' ? CurrencyDollarIcon : ClockIcon" 
+                                                class="w-3.5 h-3.5" 
+                                            />
+                                            {{ getStatusText(order.status) }}
+                                        </button>
+                                        <p 
+                                            class="text-sm font-bold mt-2"
+                                            :class="countdowns[order.id]?.expired ? 'text-red-500' : 'text-indigo-600'"
+                                        >
+                                            {{ countdowns[order.id]?.text || '...' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Order Items Summary -->
+                                <div v-if="order.items?.length > 0" class="mb-3 text-sm text-gray-600 truncate">
+                                    {{ order.items.map(i => i.product_name).join(', ') }}
+                                </div>
+                                
+                                <!-- Cancellation Reason -->
+                                <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
+                                    <ExclamationCircleIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                                    <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ formatMoney(order.total_price) }}</span>
+                                    <a
+                                        :href="`/pos/box/${order.id}/receipt`"
+                                        target="_blank"
+                                        class="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
+                                    >
+                                        <DocumentTextIcon class="w-4 h-4" />
+                                        Kwitansi
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -377,45 +472,60 @@ const statusOptions = [
         <Teleport to="body">
             <div 
                 v-if="showStatusModal" 
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                 @click.self="closeStatusModal"
             >
-                <div class="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-                    <div class="p-4 border-b">
-                        <h3 class="font-semibold text-gray-800">Ubah Status Order</h3>
-                        <p class="text-sm text-gray-500">{{ selectedOrder?.customer_name }}</p>
+                <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
+                    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-t-3xl">
+                        <h3 class="font-bold text-xl text-gray-800">Ubah Status Order</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ selectedOrder?.customer_name }}</p>
                     </div>
-                    <div class="p-4 space-y-4">
+                    <div class="p-6 space-y-5">
                         <!-- Status Selection -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Pilih Status</label>
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-gray-700">Pilih Status</label>
                             <div class="space-y-2">
                                 <button
                                     v-for="option in statusOptions"
                                     :key="option.value"
                                     @click="statusForm.status = option.value"
                                     :class="[
-                                        'w-full p-3 rounded-lg border-2 text-left flex items-center gap-3 transition',
+                                        'w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all duration-300',
                                         statusForm.status === option.value 
-                                            ? 'border-blue-500 bg-blue-50' 
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg shadow-indigo-500/10 scale-[1.02]' 
+                                            : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                                     ]"
                                 >
-                                    <span class="text-xl">{{ option.icon }}</span>
-                                    <div>
-                                        <span class="font-medium block">{{ option.label }}</span>
+                                    <div :class="[
+                                        'w-12 h-12 rounded-xl flex items-center justify-center shadow-lg',
+                                        option.value === 'pending' ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/30' :
+                                        option.value === 'paid' ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-emerald-500/30' :
+                                        option.value === 'completed' ? 'bg-gradient-to-br from-sky-400 to-blue-500 shadow-sky-500/30' :
+                                        'bg-gradient-to-br from-red-400 to-rose-500 shadow-red-500/30'
+                                    ]">
+                                        <ClockIcon v-if="option.icon === 'clock'" class="w-6 h-6 text-white" />
+                                        <CurrencyDollarIcon v-else-if="option.icon === 'currency'" class="w-6 h-6 text-white" />
+                                        <CheckCircleIcon v-else-if="option.icon === 'check'" class="w-6 h-6 text-white" />
+                                        <XCircleIcon v-else class="w-6 h-6 text-white" />
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="font-bold block text-gray-800">{{ option.label }}</span>
                                         <span class="text-xs text-gray-500">{{ option.description }}</span>
+                                    </div>
+                                    <div v-if="statusForm.status === option.value" class="text-indigo-500">
+                                        <CheckCircleSolidIcon class="w-7 h-7" />
                                     </div>
                                 </button>
                             </div>
                         </div>
                         
                         <!-- Payment Proof Upload (for paid/completed) -->
-                        <div v-if="requiresPaymentProof" class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">
-                                📷 Upload Bukti Pembayaran <span class="text-red-500">*</span>
+                        <div v-if="requiresPaymentProof" class="space-y-3">
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                <PhotoIcon class="w-5 h-5" />
+                                Upload Bukti Pembayaran <span class="text-red-500">*</span>
                             </label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition">
+                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 transition-all duration-300 cursor-pointer group">
                                 <input
                                     ref="fileInputRef"
                                     type="file"
@@ -424,48 +534,54 @@ const statusOptions = [
                                     class="hidden"
                                     id="payment-proof-input"
                                 />
-                                <label for="payment-proof-input" class="cursor-pointer">
+                                <label for="payment-proof-input" class="cursor-pointer block">
                                     <div v-if="!statusForm.payment_proof" class="text-gray-500">
-                                        <p class="text-2xl mb-2">📤</p>
-                                        <p class="text-sm">Klik untuk upload gambar</p>
-                                        <p class="text-xs text-gray-400">JPG, PNG, max 5MB</p>
+                                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-100 transition-colors">
+                                            <ArrowUpTrayIcon class="w-8 h-8 text-gray-400 group-hover:text-indigo-500" />
+                                        </div>
+                                        <p class="text-sm font-medium">Klik untuk upload gambar</p>
+                                        <p class="text-xs text-gray-400 mt-1">JPG, PNG, max 5MB</p>
                                     </div>
-                                    <div v-else class="text-green-600">
-                                        <p class="text-2xl mb-2">✅</p>
-                                        <p class="text-sm font-medium">{{ statusForm.payment_proof.name }}</p>
-                                        <p class="text-xs text-gray-400">Klik untuk ganti</p>
+                                    <div v-else class="text-emerald-600">
+                                        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <CheckCircleSolidIcon class="w-8 h-8" />
+                                        </div>
+                                        <p class="text-sm font-semibold">{{ statusForm.payment_proof.name }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">Klik untuk ganti</p>
                                     </div>
                                 </label>
                             </div>
-                            <p v-if="selectedOrder?.payment_proof_path" class="text-xs text-green-600">
-                                ✓ Bukti pembayaran sudah ada sebelumnya
+                            <p v-if="selectedOrder?.payment_proof_path" class="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                                <CheckCircleIcon class="w-4 h-4" />
+                                Bukti pembayaran sudah ada sebelumnya
                             </p>
                         </div>
                         
                         <!-- Cancellation Reason (for cancelled) -->
-                        <div v-if="requiresCancellationReason" class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">
-                                📝 Alasan Pembatalan <span class="text-red-500">*</span>
+                        <div v-if="requiresCancellationReason" class="space-y-3">
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                <PencilSquareIcon class="w-5 h-5" />
+                                Alasan Pembatalan <span class="text-red-500">*</span>
                             </label>
                             <textarea
                                 v-model="statusForm.cancellation_reason"
-                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                                 rows="3"
                                 placeholder="Masukkan alasan pembatalan order..."
                             ></textarea>
                         </div>
                     </div>
-                    <div class="p-4 border-t flex gap-3">
+                    <div class="p-6 border-t border-gray-100 flex gap-3">
                         <button
                             @click="closeStatusModal"
-                            class="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                            class="flex-1 py-3.5 border-2 border-gray-200 rounded-2xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
                         >
                             Batal
                         </button>
                         <button
                             @click="submitStatusChange"
                             :disabled="statusForm.processing || !isFormValid"
-                            class="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-indigo-500/30"
                         >
                             {{ statusForm.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
@@ -478,31 +594,34 @@ const statusOptions = [
         <Teleport to="body">
             <div 
                 v-if="showNotificationModal" 
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             >
-                <div class="bg-white rounded-lg w-full max-w-sm text-center">
-                    <div class="p-6">
-                        <div class="text-5xl mb-4">⏰</div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Waktu Pengambilan Tiba!</h3>
-                        <p class="text-gray-600 mb-4">
-                            Order untuk <strong>{{ selectedOrder?.customer_name }}</strong> sudah waktunya diambil.
+                <div class="bg-white rounded-3xl w-full max-w-sm text-center shadow-2xl animate-scale-in">
+                    <div class="p-8">
+                        <div class="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-500/30 animate-pulse">
+                            <BellAlertIcon class="w-12 h-12 text-white" />
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Waktu Pengambilan Tiba!</h3>
+                        <p class="text-gray-600 mb-6">
+                            Order untuk <strong class="text-gray-800">{{ selectedOrder?.customer_name }}</strong> sudah waktunya diambil.
                         </p>
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-yellow-800">
+                        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
+                            <p class="text-sm text-amber-800 flex items-center justify-center gap-2 font-medium">
+                                <SparklesIcon class="w-5 h-5" />
                                 Segera konfirmasi status order ini.
                             </p>
                         </div>
                     </div>
-                    <div class="p-4 border-t flex gap-3">
+                    <div class="p-6 border-t border-gray-100 flex gap-3">
                         <button
                             @click="closeNotificationModal"
-                            class="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                            class="flex-1 py-3.5 border-2 border-gray-200 rounded-2xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors duration-200"
                         >
                             Nanti
                         </button>
                         <button
                             @click="confirmFromNotification"
-                            class="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-indigo-500/30"
                         >
                             Konfirmasi Status
                         </button>
@@ -512,3 +631,46 @@ const statusOptions = [
         </Teleport>
     </EmployeeLayout>
 </template>
+
+<style scoped>
+/* Prevent page scroll */
+:deep(.min-h-screen) {
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
+
+/* Animation */
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+}
+</style>

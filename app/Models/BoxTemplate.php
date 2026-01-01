@@ -1,5 +1,5 @@
 <?php
-
+// Rivaldi | 202312050
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
