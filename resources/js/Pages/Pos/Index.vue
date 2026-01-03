@@ -1,199 +1,263 @@
 <script setup>
-import EmployeeLayout from '@/Layouts/EmployeeLayout.vue';
-import BaseButton from '@/Components/BaseButton.vue';
-import StatsCard from '@/Components/StatsCard.vue';
+import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import EmployeeLayout from '@/Layouts/EmployeeLayout.vue';
+import StatsCard from '@/Components/StatsCard.vue';
+import BaseButton from '@/Components/BaseButton.vue';
+import { usePosStore } from '@/Stores/usePosStore';
+import { Store, ShoppingCart, Search, Trash2, X, Plus, Minus, CreditCard } from 'lucide-vue-next';
+import PaymentModal from './Partials/PaymentModal.vue';
 
 const props = defineProps({
-    currentSession: {
-        type: Object,
-        default: null
-    },
-    stats: {
-        type: Object,
-        default: () => ({
-            todaySales: 0,
-            itemsSold: 0,
-            boxOrders: 0
-        })
-    }
+    stats: Object,
+    sessionInfo: Object,
 });
 
-const page = usePage();
+const posStore = usePosStore();
+const searchInput = ref(null);
+const isPaymentModalOpen = ref(false);
 
-// Get session info for layout
-const sessionInfo = computed(() => ({
-    isActive: !!props.currentSession,
-    shiftName: props.currentSession?.shift_name || null,
-    openingBalance: props.currentSession?.opening_balance || 0,
-    openedAt: props.currentSession?.opened_at || null
-}));
+// Initialize Session in Store
+if (props.sessionInfo) {
+    posStore.setSession(props.sessionInfo);
+}
+
+// Dummy Products for Demo
+const products = ref([
+    { id: 1, name: 'Kopi Susu Gula Aren', price: 18000, category: 'Coffee', color: 'bg-amber-100 text-amber-800' },
+    { id: 2, name: 'Americano Items', price: 15000, category: 'Coffee', color: 'bg-amber-100 text-amber-800' },
+    { id: 3, name: 'Croissant Butter', price: 22000, category: 'Pastry', color: 'bg-orange-100 text-orange-800' },
+    { id: 4, name: 'Choco Muffin', price: 18000, category: 'Pastry', color: 'bg-orange-100 text-orange-800' },
+    { id: 5, name: 'Ice Tea', price: 10000, category: 'Beverage', color: 'bg-emerald-100 text-emerald-800' },
+    { id: 6, name: 'Lemonade', price: 15000, category: 'Beverage', color: 'bg-emerald-100 text-emerald-800' },
+]);
+
+const filteredProducts = computed(() => {
+    if (!posStore.searchQuery) return products.value;
+    return products.value.filter(p => 
+        p.name.toLowerCase().includes(posStore.searchQuery.toLowerCase())
+    );
+});
+
+// Format Currency
+const formatPrice = (price) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+};
+
+// Hotkeys Handler
+const handleKeydown = (e) => {
+    // F2: Focus Search
+    if (e.key === 'F2') {
+        e.preventDefault();
+        searchInput.value?.focus();
+    }
+    // F4: Pay (Trigger Checkout)
+    if (e.key === 'F4') {
+        e.preventDefault();
+        if (posStore.cart.length > 0) {
+            isPaymentModalOpen.value = true;
+        }
+    }
+    // Esc: Clear Search or Cancel
+    if (e.key === 'Escape') {
+        if (isPaymentModalOpen.value) {
+            // Let the modal handle it, mostly default behavior is close
+        } else if (document.activeElement === searchInput.value) {
+            posStore.searchQuery = '';
+            searchInput.value.blur();
+        }
+    }
+};
+
+const handleTransactionComplete = () => {
+    posStore.clearCart();
+    // In real app, reload page or fetch updated stats
+};
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <template>
-    <Head title="POS Dashboard" />
+    <Head title="POS Interface" />
 
     <EmployeeLayout :session-info="sessionInfo">
-        <template #header>
-            <h2 class="text-lg font-semibold text-slate-800">
-                POS Dashboard
-            </h2>
-        </template>
-
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <StatsCard
-                title="Penjualan Hari Ini"
-                :value="stats?.todaySales || 0"
-                prefix="Rp "
-                :currency="true"
-                variant="success"
-            >
-                <template #icon>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </template>
-            </StatsCard>
-
-            <StatsCard
-                title="Item Terjual"
-                :value="stats?.itemsSold || 0"
-                suffix=" pcs"
-                variant="positive"
-            >
-                <template #icon>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                </template>
-            </StatsCard>
-
-            <StatsCard
-                title="Box Orders"
-                :value="stats?.boxOrders || 0"
-                suffix=" order"
-                variant="default"
-            >
-                <template #icon>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                    </svg>
-                </template>
-            </StatsCard>
-        </div>
-
-        <!-- Quick Actions Grid -->
-        <div class="bg-white rounded-xl shadow-card p-5 mb-6">
-            <h3 class="text-base font-semibold text-slate-800 mb-4">Menu Cepat</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Link 
-                    v-if="!sessionInfo.isActive"
-                    href="/pos/open"
-                    class="flex flex-col items-center justify-center p-4 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all group"
-                >
-                    <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
-                        </svg>
+        <!-- Split Layout Container -->
+        <div class="h-full flex flex-col lg:flex-row gap-6">
+            
+            <!-- LEFT COLUMN: Product Catalog & Dashboard (Scrollable) -->
+            <div class="flex-1 flex flex-col gap-6 h-full overflow-hidden">
+                
+                <!-- Helper / Dashboard Stats Header (Collapsible or Small) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+                    <div class="bg-card p-3 rounded-xl border border-border shadow-sm flex items-center space-x-3">
+                         <div class="bg-emerald-100 p-2 rounded-lg text-emerald-600">
+                            <Store class="w-5 h-5" />
+                         </div>
+                         <div>
+                            <p class="text-xs text-muted-foreground">Penjualan</p>
+                            <p class="font-bold text-foreground">{{ formatPrice(stats?.todaySales || 0) }}</p>
+                         </div>
                     </div>
-                    <span class="text-sm font-medium text-emerald-700">Buka Toko</span>
-                </Link>
-
-                <Link 
-                    href="/pos/consignment"
-                    class="flex flex-col items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all group"
-                >
-                    <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
+                     <div class="bg-card p-3 rounded-xl border border-border shadow-sm flex items-center space-x-3">
+                         <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                            <ShoppingCart class="w-5 h-5" />
+                         </div>
+                         <div>
+                            <p class="text-xs text-muted-foreground">Order</p>
+                            <p class="font-bold text-foreground">{{ stats?.boxOrders || 0 }}</p>
+                         </div>
                     </div>
-                    <span class="text-sm font-medium text-blue-700">Kelola Barang</span>
-                </Link>
-
-                <Link 
-                    href="/pos/box"
-                    class="flex flex-col items-center justify-center p-4 bg-amber-50 hover:bg-amber-100 rounded-xl transition-all group"
-                >
-                    <div class="w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                        </svg>
-                    </div>
-                    <span class="text-sm font-medium text-amber-700">Box Order</span>
-                </Link>
-
-                <Link 
-                    v-if="sessionInfo.isActive"
-                    href="/pos/close"
-                    class="flex flex-col items-center justify-center p-4 bg-red-50 hover:bg-red-100 rounded-xl transition-all group"
-                >
-                    <div class="w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                    </div>
-                    <span class="text-sm font-medium text-red-700">Tutup Toko</span>
-                </Link>
-
-                <Link 
-                    v-else
-                    href="/profile"
-                    class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all group"
-                >
-                    <div class="w-12 h-12 rounded-full bg-slate-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                    <span class="text-sm font-medium text-slate-700">Profil</span>
-                </Link>
-            </div>
-        </div>
-
-        <!-- Session Info Card (if active) -->
-        <div v-if="sessionInfo.isActive" class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg p-5 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-emerald-100 text-sm">Sesi Aktif</p>
-                    <p class="text-xl font-bold mt-1">{{ sessionInfo.shiftName || 'Shift Pagi' }}</p>
-                    <p class="text-emerald-100 text-sm mt-2">
-                        Saldo Awal: <span class="font-semibold text-white">Rp {{ new Intl.NumberFormat('id-ID').format(sessionInfo.openingBalance) }}</span>
-                    </p>
                 </div>
-                <div class="text-right">
-                    <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+
+                <!-- Product Search Bar -->
+                <div class="shrink-0 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search class="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <input
+                        ref="searchInput"
+                        type="text"
+                        v-model="posStore.searchQuery"
+                        class="block w-full pl-10 pr-4 py-3 border-transparent bg-card shadow-sm rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-colors text-foreground placeholder:text-muted-foreground font-medium"
+                        placeholder="Cari produk... (Tekan F2)"
+                    />
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <span class="text-xs text-muted-foreground border border-border px-1.5 py-0.5 rounded">F2</span>
+                    </div>
+                </div>
+
+                <!-- Product Grid (Scrollable) -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-20 lg:pb-0">
+                    <div v-if="filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <button
+                            v-for="product in filteredProducts"
+                            :key="product.id"
+                            @click="posStore.addItem(product)"
+                            class="group bg-card hover:bg-card/80 border border-border hover:border-primary/50 rounded-xl p-4 flex flex-col items-start gap-2 transition-all duration-200 text-left relative overflow-hidden shadow-sm hover:shadow-md"
+                        >
+                            <div :class="['w-full aspect-square rounded-lg mb-2 flex items-center justify-center font-bold text-2xl', product.color]">
+                                {{ product.name.charAt(0) }}
+                            </div>
+                            <h3 class="font-semibold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                                {{ product.name }}
+                            </h3>
+                            <p class="text-gradient-primary font-bold mt-auto">
+                                {{ formatPrice(product.price) }}
+                            </p>
+                        </button>
+                    </div>
+                     <div v-else class="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                        <Search class="w-12 h-12 mb-2 opacity-20" />
+                        <p>Produk tidak ditemukan</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Instructions when no session -->
-        <div v-else class="bg-slate-100 rounded-xl p-6 text-center">
-            <div class="w-16 h-16 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+            <!-- RIGHT COLUMN: Cart & Checkout (Fixed) -->
+            <div class="w-full lg:w-96 flex-none flex flex-col h-full bg-card border-l border-border/50 shadow-xl overflow-hidden z-20">
+                 <!-- Cart Header -->
+                 <div class="p-4 border-b border-border flex items-center justify-between bg-card">
+                    <h3 class="font-bold text-lg flex items-center">
+                        <ShoppingCart class="w-5 h-5 mr-2 text-primary" />
+                        Keranjang
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <button 
+                            @click="posStore.clearCart" 
+                            class="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            title="Bersihkan Keranjang"
+                        >
+                            <Trash2 class="w-4 h-4" />
+                        </button>
+                    </div>
+                 </div>
+
+                 <!-- Cart Items (Scrollable) -->
+                 <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-muted/10">
+                    <div v-if="posStore.cart.length === 0" class="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
+                         <ShoppingCart class="w-16 h-16 mb-4 opacity-20" />
+                         <p class="text-sm">Belum ada item</p>
+                         <p class="text-xs mt-1">Pilih produk di sebelah kiri</p>
+                    </div>
+
+                    <div 
+                        v-for="item in posStore.cart" 
+                        :key="item.id"
+                        class="bg-card p-3 rounded-lg border border-border shadow-sm flex items-center gap-3 animate-in slide-in-from-bottom-2 duration-200"
+                    >
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-foreground truncate">{{ item.name }}</h4>
+                            <p class="text-xs text-muted-foreground">{{ formatPrice(item.price) }}</p>
+                        </div>
+                        
+                        <!-- Qty Controls -->
+                        <div class="flex items-center bg-muted rounded-lg p-1">
+                            <button 
+                                @click="posStore.updateQuantity(item.id, item.quantity - 1)"
+                                class="w-7 h-7 flex items-center justify-center rounded-md bg-white hover:bg-white/80 text-foreground shadow-sm transition-colors"
+                            >
+                                <Minus class="w-3 h-3" />
+                            </button>
+                            <span class="w-8 text-center text-sm font-bold">{{ item.quantity }}</span>
+                            <button 
+                                @click="posStore.addItem(item)"
+                                class="w-7 h-7 flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors"
+                            >
+                                <Plus class="w-3 h-3" />
+                            </button>
+                        </div>
+                    </div>
+                 </div>
+
+                 <!-- Footer: Totals & Pay -->
+                 <div class="p-4 bg-card border-t border-border shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm text-muted-foreground">
+                            <span>Subtotal</span>
+                            <span>{{ formatPrice(posStore.subtotal) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-muted-foreground">
+                            <span>Pajak (0%)</span>
+                            <span>{{ formatPrice(posStore.tax) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xl font-bold text-foreground pt-2 border-t border-dashed border-border">
+                            <span>Total</span>
+                            <span class="text-gradient-primary">{{ formatPrice(posStore.total) }}</span>
+                        </div>
+                    </div>
+                    
+                    <BaseButton 
+                        variant="primary" 
+                        size="xl" 
+                        full-width 
+                        class="shadow-lg shadow-emerald-500/20 py-4"
+                        :disabled="posStore.cart.length === 0"
+                        @click="handleKeydown({ key: 'F4', preventDefault: () => {} })"
+                    >
+                        <div class="flex items-center justify-between w-full">
+                            <span class="flex items-center">
+                                <CreditCard class="w-5 h-5 mr-2" />
+                                Bayar (F4)
+                            </span>
+                            <span class="bg-black/10 px-2 py-0.5 rounded text-sm group-hover:bg-black/20 transition-colors">
+                                {{ formatPrice(posStore.total) }}
+                            </span>
+                        </div>
+                    </BaseButton>
+                 </div>
             </div>
-            <h3 class="text-lg font-semibold text-slate-700 mb-2">Belum Ada Sesi Aktif</h3>
-            <p class="text-sm text-slate-500 mb-4">
-                Silakan buka toko terlebih dahulu untuk memulai transaksi hari ini.
-            </p>
-            <Link href="/pos/open">
-                <BaseButton variant="primary" size="lg">
-                    <template #icon-left>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
-                        </svg>
-                    </template>
-                    Buka Toko Sekarang
-                </BaseButton>
-            </Link>
         </div>
+        
+        <PaymentModal 
+            :is-open="isPaymentModalOpen" 
+            @close="isPaymentModalOpen = false"
+            @complete="handleTransactionComplete"
+        />
     </EmployeeLayout>
 </template>

@@ -1,6 +1,6 @@
 <script setup>
 import { Head, useForm, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import {
   Card,
@@ -12,7 +12,7 @@ import {
   Label,
   Button,
 } from '@/Components/ui'
-import { User, Mail, Lock, Trash2, AlertTriangle, Loader2, CheckCircle } from 'lucide-vue-next'
+import { User, Mail, Lock, Trash2, AlertTriangle, Loader2, CheckCircle, Camera, Pencil } from 'lucide-vue-next'
 
 const props = defineProps({
   mustVerifyEmail: Boolean,
@@ -24,13 +24,49 @@ const user = computed(() => page.props.auth?.user)
 
 // Profile Info Form
 const profileForm = useForm({
+  _method: 'PATCH',
   name: user.value?.name || '',
   email: user.value?.email || '',
+  photo: null,
 })
 
+const photoPreview = ref(null);
+const photoInput = ref(null);
+
+const selectNewPhoto = () => {
+    photoInput.value.click();
+};
+
+const updatePhotoPreview = () => {
+    const photo = photoInput.value.files[0];
+
+    if (!photo) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        photoPreview.value = e.target.result;
+    };
+
+    reader.readAsDataURL(photo);
+    profileForm.photo = photo;
+};
+
+const cancelPhotoUpdate = () => {
+    photoPreview.value = null;
+    photoInput.value.value = null;
+    profileForm.photo = null;
+};
+
 const updateProfile = () => {
-  profileForm.patch(route('profile.update'), {
+  profileForm.post(route('profile.update'), {
     preserveScroll: true,
+    onSuccess: () => {
+        // Clear preview on success? or keep it. user prop update will update the real image.
+        // Actually usually inertia reloads props, so user.profile_photo_path will be new.
+        // But preview shows local file.
+        // We can check if we want to clear preview.
+    }
   })
 }
 
@@ -60,6 +96,7 @@ const deleteAccount = () => {
     preserveScroll: true,
   })
 }
+
 </script>
 
 <template>
@@ -71,18 +108,101 @@ const deleteAccount = () => {
     </template>
 
     <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Glassmorphic Header with Avatar -->
-      <div class="glass rounded-2xl p-6 flex items-center gap-6">
-        <!-- Avatar -->
-        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
-          {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+      <!-- Profile Header with Avatar -->
+      <div class="bg-card border border-border rounded-2xl p-6 flex items-center gap-6 shadow-sm">
+        <!-- Avatar Section -->
+        <div class="relative group">
+            <input 
+                ref="photoInput"
+                type="file" 
+                class="hidden"
+                @change="updatePhotoPreview"
+            >
+            
+            <!-- Avatar Display -->
+            <div 
+                class="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg overflow-hidden cursor-pointer ring-4 ring-background group-hover:ring-primary/20 transition-all relative bg-muted"
+                :class="!photoPreview && !user?.profile_photo_path ? 'bg-gradient-to-br from-primary to-primary/60 text-primary-foreground' : 'bg-muted'"
+                @click="selectNewPhoto"
+            >
+                <!-- Preview from file input -->
+                <img 
+                    v-if="photoPreview" 
+                    :src="photoPreview" 
+                    class="w-full h-full object-cover" 
+                />
+                
+                <!-- Saved Profile Photo -->
+                <img 
+                    v-else-if="user?.profile_photo_path" 
+                    :src="`/storage/${user.profile_photo_path}`" 
+                    class="w-full h-full object-cover" 
+                />
+                
+                <!-- Initials Fallback -->
+                <span v-else>
+                    {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </span>
+                
+                <!-- Overlay on Hover -->
+                 <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Camera class="w-6 h-6 text-white mb-1" />
+                     <span class="text-[10px] text-white font-medium">Ubah</span>
+                 </div>
+            </div>
+            
+            <!-- Edit Badge -->
+            <div 
+                @click="selectNewPhoto"
+                class="absolute bottom-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full shadow-md cursor-pointer hover:bg-primary/90 transition-colors border-2 border-background"
+                title="Change Photo"
+            >
+                <Pencil class="w-3.5 h-3.5" />
+            </div>
         </div>
-        <div class="flex-1">
-          <h1 class="text-2xl font-bold text-foreground">{{ user?.name }}</h1>
-          <p class="text-muted-foreground">{{ user?.email }}</p>
-          <p class="text-xs text-muted-foreground mt-1">
-            Role: <span class="capitalize font-medium text-primary">{{ user?.role || 'User' }}</span>
-          </p>
+
+        <div class="flex-1 space-y-3">
+          <div>
+              <h1 class="text-2xl font-bold text-foreground">{{ user?.name }}</h1>
+              <p class="text-base text-muted-foreground">{{ user?.email }}</p>
+          </div>
+          
+          <div class="flex items-center gap-3">
+               <div class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary capitalize">
+                 {{ user?.role || 'User' }}
+               </div>
+               
+               <!-- Photo Actions -->
+               <div v-if="photoPreview" class="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                   <Button 
+                       size="sm" 
+                       @click="updateProfile"
+                       :loading="profileForm.processing"
+                   >
+                       Simpan Foto
+                   </Button>
+                   <Button 
+                       type="button"
+                       variant="ghost" 
+                       size="sm"
+                       @click="cancelPhotoUpdate"
+                       :disabled="profileForm.processing"
+                       class="text-muted-foreground hover:text-foreground"
+                   >
+                       Batal
+                   </Button>
+               </div>
+               <div v-else>
+                   <button 
+                       type="button" 
+                       @click="selectNewPhoto" 
+                       class="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                   >
+                       <Camera class="w-3.5 h-3.5" />
+                       Ubah Foto Profil
+                   </button>
+               </div>
+          </div>
         </div>
       </div>
 
@@ -101,6 +221,7 @@ const deleteAccount = () => {
         </CardHeader>
         <CardContent>
           <form @submit.prevent="updateProfile" class="space-y-4">
+            <!-- (Form Fields remain similar, just keeping context) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
                 <Label for="name" :error="!!profileForm.errors.name">Name</Label>

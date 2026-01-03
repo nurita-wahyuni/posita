@@ -1,4 +1,8 @@
-<!-- Rivaldi | 202312050 -->
+<!--
+  Created/Modified by: Rivaldi
+  NIM: 202312050
+  Feature: Order Box - Form pembuatan order box baru
+-->
 <script setup>
 import EmployeeLayout from '@/Layouts/EmployeeLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
