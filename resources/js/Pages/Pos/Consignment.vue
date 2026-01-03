@@ -89,15 +89,16 @@ const submit = () => {
             <h2 class="text-lg font-semibold text-gray-800">Barang Titipan</h2>
         </template>
 
-   <!-- No active session -->
-            <div v-if="!hasSession" class="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
-                <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle class="w-6 h-6 text-orange-600" />
+        <div class="p-4 lg:p-6 space-y-6">
+            <!-- No active session -->
+            <div v-if="!hasActiveSession" class="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-6 text-center">
+                <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle class="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </div>
-                <h3 class="text-lg font-semibold text-orange-800 mb-2">
+                <h3 class="text-lg font-semibold text-orange-800 dark:text-orange-200 mb-2">
                     Tidak Ada Sesi Aktif
                 </h3>
-                <p class="text-orange-600 mb-4">
+                <p class="text-orange-600 dark:text-orange-300 mb-4">
                     Anda belum membuka toko hari ini
                 </p>
                 <Link
@@ -109,55 +110,58 @@ const submit = () => {
                 </Link>
             </div>
 
-        <div v-else>
-            <!-- Summary -->
-            <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4 mb-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-emerald-600">Total Item: {{ summary?.total_items || 0 }}</p>
-                        <p class="text-sm text-emerald-600">Stok Awal Total: {{ summary?.total_qty_initial || 0 }} pcs</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-emerald-600">Estimasi Nilai Stok</p>
-                        <p class="font-bold text-emerald-800">{{ formatMoney(summary?.total_stock_value) }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add Button - Green -->
-            <div class="mb-4">
-                <ActionButton
-                    @click="showAddModal = true"
-                    :icon="Plus"
-                    size="lg"
-                    full-width
-                >
-                    Tambah Barang Titipan
-                </ActionButton>
-            </div>
-
-            <!-- Consignment List -->
-            <div class="space-y-3">
-                <div v-if="consignments.length === 0" class="text-center py-8 text-gray-500">
-                    Belum ada barang hari ini
-                </div>
-                <div
-                    v-for="item in consignments"
-                    :key="item.id"
-                    class="bg-white rounded-lg shadow p-4"
-                >
-                    <div class="flex justify-between items-start mb-2">
+            <div v-else class="space-y-6">
+                <!-- Summary -->
+                <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-800 rounded-lg p-6">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <p class="font-medium">{{ item.product_name }}</p>
-                            <p class="text-sm text-gray-500">{{ item.partner?.name }}</p>
+                            <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Total Item</p>
+                            <p class="text-2xl font-bold text-emerald-800 dark:text-emerald-200">{{ summary?.total_items || 0 }}</p>
+                            <p class="text-sm text-emerald-600/80 dark:text-emerald-400/80 mt-1">Stok Awal Total: {{ summary?.total_qty_initial || 0 }} pcs</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-green-600 font-medium">{{ formatMoney(item.selling_price) }}</p>
-                            <p class="text-xs text-gray-400">Modal: {{ formatMoney(item.base_price) }}</p>
+                            <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Estimasi Nilai Stok</p>
+                            <p class="text-2xl font-bold text-emerald-800 dark:text-emerald-200">{{ formatMoney(summary?.total_stock_value) }}</p>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between text-sm text-gray-600">
-                        <span>Stok Awal: {{ item.qty_initial }} pcs</span>
+                </div>
+
+                <!-- Add Button -->
+                <div>
+                    <ActionButton
+                        @click="showAddModal = true"
+                        :icon="Plus"
+                        size="lg"
+                        full-width
+                    >
+                        Tambah Barang Titipan
+                    </ActionButton>
+                </div>
+
+                <!-- Consignment List -->
+                <div class="space-y-4">
+                    <div v-if="consignments.length === 0" class="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
+                        <Package class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>Belum ada barang hari ini</p>
+                    </div>
+                    <div
+                        v-for="item in consignments"
+                        :key="item.id"
+                        class="bg-card rounded-xl shadow-sm border border-border p-5 hover:shadow-md transition-shadow"
+                    >
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="font-medium text-lg text-foreground">{{ item.product_name }}</p>
+                                <p class="text-sm text-muted-foreground">{{ item.partner?.name }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-green-600 font-bold text-lg">{{ formatMoney(item.selling_price) }}</p>
+                                <p class="text-xs text-muted-foreground">Modal: {{ formatMoney(item.base_price) }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm text-muted-foreground border-t border-border pt-3 mt-3">
+                            <span>Stok Awal: <span class="font-medium text-foreground">{{ item.qty_initial }} pcs</span></span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,8 @@
+<!--
+  Created/Modified by: Nurita Wahyuni
+  NIM: 202312061
+  Feature: Open Shop - Buka sesi toko harian dengan input modal awal
+-->
 <script setup>
 import EmployeeLayout from '@/Layouts/EmployeeLayout.vue'
 import { Head, useForm, Link } from '@inertiajs/vue3'

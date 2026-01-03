@@ -42,11 +42,19 @@ const props = defineProps({
 });
 
 const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/25 focus:ring-blue-500',
-    secondary: 'bg-slate-600 hover:bg-slate-700 text-white shadow-sm focus:ring-slate-500',
-    danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm shadow-red-600/25 focus:ring-red-500',
-    outline: 'bg-transparent border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 focus:ring-slate-500',
-    ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:ring-slate-400',
+    // Primary Action -> Uses --primary (Green in Light, Violet in Dark)
+    primary: 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shadow-emerald-500/20 dark:shadow-violet-500/20 focus:ring-primary',
+    // Accent/Brand -> Uses --accent (Orange in Light, Green in Dark)
+    brand: 'bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm focus:ring-accent', 
+    warning: 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm focus:ring-amber-500',
+    // Secondary -> Slate/Gray
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm focus:ring-slate-500',
+    // Danger -> Red
+    danger: 'bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-sm focus:ring-destructive',
+    // Outline -> Bordered
+    outline: 'bg-transparent border border-input hover:bg-accent hover:text-accent-foreground focus:ring-primary',
+    // Ghost -> Transparent
+    ghost: 'bg-transparent hover:bg-muted focus:ring-slate-400',
 };
 
 const sizeClasses = {
