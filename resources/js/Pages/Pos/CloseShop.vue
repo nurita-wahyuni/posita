@@ -3,6 +3,7 @@ import EmployeeLayout from '@/Layouts/EmployeeLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ref, computed, reactive } from 'vue';
 import { formatMoney } from '@/utils/formatMoney';
+import { AlertTriangle, BarChart3, Package, Wallet, Lock, Store, Loader2 } from 'lucide-vue-next';
 
 const props = defineProps({
     hasSession: {
@@ -119,7 +120,9 @@ const validateLeftover = (item) => {
         <div class="max-w-lg mx-auto">
             <!-- No active session -->
             <div v-if="!hasSession" class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                <div class="text-4xl mb-4">⚠️</div>
+                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle class="w-6 h-6 text-yellow-600" />
+                </div>
                 <h3 class="text-lg font-semibold text-yellow-800 mb-2">
                     Tidak Ada Sesi Aktif
                 </h3>
@@ -128,8 +131,9 @@ const validateLeftover = (item) => {
                 </p>
                 <Link
                     href="/pos/open"
-                    class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+                    class="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90"
                 >
+                    <Store class="w-5 h-5" />
                     Buka Toko
                 </Link>
             </div>
@@ -138,7 +142,10 @@ const validateLeftover = (item) => {
             <div v-else class="space-y-4">
                 <!-- Summary Card -->
                 <div class="bg-white rounded-lg shadow p-4">
-                    <h3 class="font-semibold text-gray-800 mb-3">📊 Ringkasan Hari Ini</h3>
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <BarChart3 class="w-5 h-5 text-primary" />
+                        Ringkasan Hari Ini
+                    </h3>
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <p class="text-gray-500">Kas Awal</p>
@@ -161,7 +168,10 @@ const validateLeftover = (item) => {
 
                 <!-- Items with Leftover Input -->
                 <div class="bg-white rounded-lg shadow p-4">
-                    <h3 class="font-semibold text-gray-800 mb-3">📦 Input Sisa Stok</h3>
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Package class="w-5 h-5 text-primary" />
+                        Input Sisa Stok
+                    </h3>
                     <p class="text-sm text-gray-500 mb-4">Masukkan jumlah sisa stok untuk setiap barang</p>
                     
                     <div v-if="consignments.length === 0" class="text-gray-500 text-center py-4">
@@ -213,7 +223,10 @@ const validateLeftover = (item) => {
 
                 <!-- Close Form -->
                 <div class="bg-white rounded-lg shadow p-4">
-                    <h3 class="font-semibold text-gray-800 mb-3">💰 Tutup Sesi</h3>
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Wallet class="w-5 h-5 text-primary" />
+                        Tutup Sesi
+                    </h3>
                     <form @submit.prevent="submit" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -263,9 +276,11 @@ const validateLeftover = (item) => {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-50"
+                            class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {{ form.processing ? 'Menutup...' : '🔒 Tutup Toko' }}
+                            <Loader2 v-if="form.processing" class="w-5 h-5 animate-spin" />
+                            <Lock v-else class="w-5 h-5" />
+                            {{ form.processing ? 'Menutup...' : 'Tutup Toko' }}
                         </button>
                     </form>
                 </div>

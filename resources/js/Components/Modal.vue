@@ -11,6 +11,7 @@
  * </Modal>
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { AlertTriangle, AlertCircle, CheckCircle, X } from 'lucide-vue-next';
 
 const props = defineProps({
     /** Show/hide modal */
@@ -101,20 +102,20 @@ const maxWidthClass = computed(() => ({
 
 const variantStyles = computed(() => ({
     default: {
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
+        iconBg: 'bg-blue-500/20 dark:bg-blue-500/30',
+        iconColor: 'text-blue-600 dark:text-blue-400',
     },
     danger: {
-        iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
+        iconBg: 'bg-red-500/20 dark:bg-red-500/30',
+        iconColor: 'text-red-600 dark:text-red-400',
     },
     warning: {
-        iconBg: 'bg-amber-100',
-        iconColor: 'text-amber-600',
+        iconBg: 'bg-amber-500/20 dark:bg-amber-500/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
     },
     success: {
-        iconBg: 'bg-emerald-100',
-        iconColor: 'text-emerald-600',
+        iconBg: 'bg-emerald-500/20 dark:bg-emerald-500/30',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
     },
 }[props.variant]));
 </script>
@@ -142,7 +143,7 @@ const variantStyles = computed(() => ({
                     class="fixed inset-0 transform transition-all"
                     @click="close"
                 >
-                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+                    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
                 </div>
             </Transition>
 
@@ -157,7 +158,7 @@ const variantStyles = computed(() => ({
             >
                 <div
                     v-show="show"
-                    class="mb-6 transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all sm:mx-auto sm:w-full"
+                    class="mb-6 transform overflow-hidden rounded-2xl bg-card text-card-foreground shadow-xl transition-all sm:mx-auto sm:w-full"
                     :class="maxWidthClass"
                 >
                     <template v-if="showSlot">
@@ -178,23 +179,17 @@ const variantStyles = computed(() => ({
                                         ]"
                                     >
                                         <!-- Danger Icon -->
-                                        <svg v-if="variant === 'danger'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                        </svg>
+                                        <AlertTriangle v-if="variant === 'danger'" class="w-5 h-5" />
                                         <!-- Warning Icon -->
-                                        <svg v-else-if="variant === 'warning'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
+                                        <AlertCircle v-else-if="variant === 'warning'" class="w-5 h-5" />
                                         <!-- Success Icon -->
-                                        <svg v-else-if="variant === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
+                                        <CheckCircle v-else-if="variant === 'success'" class="w-5 h-5" />
                                     </div>
                                 </slot>
                                 
                                 <div>
                                     <slot name="header">
-                                        <h3 v-if="title" class="text-lg font-semibold text-slate-900">
+                                        <h3 v-if="title" class="text-lg font-semibold text-foreground">
                                             {{ title }}
                                         </h3>
                                     </slot>
@@ -205,11 +200,9 @@ const variantStyles = computed(() => ({
                             <button 
                                 v-if="showCloseButton && closeable"
                                 @click="close"
-                                class="flex-shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                class="flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                             >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
+                                <X class="w-5 h-5" />
                             </button>
                         </div>
 
@@ -221,7 +214,7 @@ const variantStyles = computed(() => ({
                         <!-- Footer -->
                         <div 
                             v-if="$slots.footer"
-                            class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-5 py-4 bg-slate-50 border-t border-slate-100"
+                            class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-5 py-4 bg-muted border-t border-border"
                         >
                             <slot name="footer" />
                         </div>

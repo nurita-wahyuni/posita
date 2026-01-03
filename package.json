@@ -7,8 +7,15 @@
         "dev": "vite"
     },
     "dependencies": {
-        "@heroicons/vue": "^2.2.0",
+        "@tanstack/vue-table": "^8.21.3",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-vue-next": "^0.562.0",
+        "radix-vue": "^1.9.17",
+        "tailwind-merge": "^3.4.0",
+        "tailwindcss-animate": "^1.0.7",
         "vue": "^3.4.0",
+        "vue-sonner": "^2.0.9",
         "ziggy-js": "^2.4.0"
     },
     "devDependencies": {

@@ -5,25 +5,25 @@ import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { formatMoney } from '@/utils/formatMoney';
 
-// Heroicons imports
+// Lucide icons
 import {
-    PlusIcon,
-    ClockIcon,
-    ArchiveBoxIcon,
-    CalendarDaysIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    CurrencyDollarIcon,
-    ExclamationCircleIcon,
-    DocumentTextIcon,
-    PhotoIcon,
-    ArrowUpTrayIcon,
-    PencilSquareIcon,
-    ChevronDownIcon,
-    BellAlertIcon,
-    SparklesIcon
-} from '@heroicons/vue/24/outline';
-import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/vue/24/solid';
+    Plus,
+    Clock,
+    Package,
+    CalendarDays,
+    CheckCircle,
+    XCircle,
+    DollarSign,
+    AlertCircle,
+    FileText,
+    Image,
+    Upload,
+    PenSquare,
+    ChevronDown,
+    Bell,
+    Sparkles,
+    CheckCircle2
+} from 'lucide-vue-next';
 
 const props = defineProps({
     upcomingOrders: {
@@ -227,7 +227,7 @@ const statusOptions = [
     <EmployeeLayout>
         <template #header>
             <div class="flex items-center gap-2">
-                <ArchiveBoxIcon class="w-6 h-6 text-gray-600" />
+                <Package class="w-6 h-6 text-gray-600" />
                 <h2 class="text-lg font-semibold text-gray-800">Order Box</h2>
             </div>
         </template>
@@ -240,7 +240,7 @@ const statusOptions = [
                 class="flex-shrink-0 flex items-center justify-center gap-2 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white py-4 rounded-2xl font-semibold text-center shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.01] transition-all duration-300 group"
             >
                 <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                    <PlusIcon class="w-5 h-5" />
+                    <Plus class="w-5 h-5" />
                 </div>
                 <span class="text-lg">Buat Order Baru</span>
             </Link>
@@ -250,10 +250,10 @@ const statusOptions = [
                 <!-- Left Column: Countdown + Today Orders -->
                 <div class="flex flex-col gap-4 min-h-0">
                     <!-- Countdown Widget -->
-                    <div v-if="upcomingOrders.length > 0" class="flex-shrink-0 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl shadow-xl shadow-purple-500/20 overflow-hidden">
+                    <div v-if="upcomingOrders.length > 0" class="flex-shrink-0 bg-gradient-to-br from-violet-500 via-muted0 to-fuchsia-500 rounded-2xl shadow-xl shadow-muted0/20 overflow-hidden">
                         <div class="px-5 py-4 flex items-center gap-3 border-b border-white/10">
                             <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                <ClockIcon class="w-5 h-5 text-white" />
+                                <Clock class="w-5 h-5 text-white" />
                             </div>
                             <div>
                                 <h3 class="font-bold text-white">Countdown Terdekat</h3>
@@ -292,7 +292,7 @@ const statusOptions = [
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                                        <ArchiveBoxIcon class="w-5 h-5 text-white" />
+                                        <Package class="w-5 h-5 text-white" />
                                     </div>
                                     <div>
                                         <h3 class="font-bold text-gray-800">Pengambilan Hari Ini</h3>
@@ -307,7 +307,7 @@ const statusOptions = [
                         <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
                             <div v-if="todayOrders.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400">
                                 <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <ArchiveBoxIcon class="w-10 h-10 opacity-50" />
+                                    <Package class="w-10 h-10 opacity-50" />
                                 </div>
                                 <p class="font-medium">Tidak ada order hari ini</p>
                                 <p class="text-sm text-gray-400">Semua order sudah selesai!</p>
@@ -322,7 +322,7 @@ const statusOptions = [
                                         <div>
                                             <p class="font-bold text-gray-800">{{ order.customer_name }}</p>
                                             <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
-                                                <ClockIcon class="w-4 h-4" />
+                                                <Clock class="w-4 h-4" />
                                                 {{ new Date(order.pickup_datetime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
                                             </p>
                                         </div>
@@ -331,7 +331,7 @@ const statusOptions = [
                                             :class="['inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border cursor-pointer hover:scale-105 transition-all duration-200', getStatusBadge(order.status)]"
                                         >
                                             <component 
-                                                :is="order.status === 'completed' ? CheckCircleIcon : order.status === 'cancelled' ? XCircleIcon : order.status === 'paid' ? CurrencyDollarIcon : ClockIcon" 
+                                                :is="order.status === 'completed' ? CheckCircle : order.status === 'cancelled' ? XCircle : order.status === 'paid' ? DollarSign : Clock" 
                                                 class="w-3.5 h-3.5" 
                                             />
                                             {{ getStatusText(order.status) }}
@@ -348,7 +348,7 @@ const statusOptions = [
                                     
                                     <!-- Cancellation Reason -->
                                     <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
-                                        <ExclamationCircleIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                        <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
                                         <div>
                                             <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
                                         </div>
@@ -361,7 +361,7 @@ const statusOptions = [
                                             target="_blank"
                                             class="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
                                         >
-                                            <DocumentTextIcon class="w-4 h-4" />
+                                            <FileText class="w-4 h-4" />
                                             Kwitansi
                                         </a>
                                     </div>
@@ -373,11 +373,11 @@ const statusOptions = [
 
                 <!-- Right Column: Upcoming Orders -->
                 <div class="min-h-0 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col overflow-hidden">
-                    <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+                    <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-muted">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                                    <CalendarDaysIcon class="w-5 h-5 text-white" />
+                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-muted0 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                                    <CalendarDays class="w-5 h-5 text-white" />
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-gray-800">Order Mendatang</h3>
@@ -392,7 +392,7 @@ const statusOptions = [
                     <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
                         <div v-if="upcomingOrders.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400">
                             <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                <CalendarDaysIcon class="w-10 h-10 opacity-50" />
+                                <CalendarDays class="w-10 h-10 opacity-50" />
                             </div>
                             <p class="font-medium">Tidak ada order mendatang</p>
                             <p class="text-sm text-gray-400">Buat order baru untuk memulai!</p>
@@ -407,7 +407,7 @@ const statusOptions = [
                                     <div class="flex-1 min-w-0">
                                         <p class="font-bold text-gray-800 truncate">{{ order.customer_name }}</p>
                                         <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
-                                            <CalendarDaysIcon class="w-4 h-4 flex-shrink-0" />
+                                            <CalendarDays class="w-4 h-4 flex-shrink-0" />
                                             <span class="truncate">{{ new Date(order.pickup_datetime).toLocaleString('id-ID', { 
                                                 weekday: 'short', 
                                                 day: 'numeric', 
@@ -423,7 +423,7 @@ const statusOptions = [
                                             :class="['inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border cursor-pointer hover:scale-105 transition-all duration-200', getStatusBadge(order.status)]"
                                         >
                                             <component 
-                                                :is="order.status === 'completed' ? CheckCircleIcon : order.status === 'cancelled' ? XCircleIcon : order.status === 'paid' ? CurrencyDollarIcon : ClockIcon" 
+                                                :is="order.status === 'completed' ? CheckCircle : order.status === 'cancelled' ? XCircle : order.status === 'paid' ? DollarSign : Clock" 
                                                 class="w-3.5 h-3.5" 
                                             />
                                             {{ getStatusText(order.status) }}
@@ -444,20 +444,20 @@ const statusOptions = [
                                 
                                 <!-- Cancellation Reason -->
                                 <div v-if="order.status === 'cancelled' && order.cancellation_reason" class="mb-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
-                                    <ExclamationCircleIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                    <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <span class="font-medium">Alasan batal:</span> {{ order.cancellation_reason }}
                                     </div>
                                 </div>
                                 
                                 <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                                    <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ formatMoney(order.total_price) }}</span>
+                                    <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-primary bg-clip-text text-transparent">{{ formatMoney(order.total_price) }}</span>
                                     <a
                                         :href="`/pos/box/${order.id}/receipt`"
                                         target="_blank"
                                         class="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
                                     >
-                                        <DocumentTextIcon class="w-4 h-4" />
+                                        <FileText class="w-4 h-4" />
                                         Kwitansi
                                     </a>
                                 </div>
@@ -476,7 +476,7 @@ const statusOptions = [
                 @click.self="closeStatusModal"
             >
                 <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
-                    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-t-3xl">
+                    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-muted rounded-t-3xl">
                         <h3 class="font-bold text-xl text-gray-800">Ubah Status Order</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ selectedOrder?.customer_name }}</p>
                     </div>
@@ -492,7 +492,7 @@ const statusOptions = [
                                     :class="[
                                         'w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all duration-300',
                                         statusForm.status === option.value 
-                                            ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg shadow-indigo-500/10 scale-[1.02]' 
+                                            ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-muted shadow-lg shadow-indigo-500/10 scale-[1.02]' 
                                             : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                                     ]"
                                 >
@@ -503,17 +503,17 @@ const statusOptions = [
                                         option.value === 'completed' ? 'bg-gradient-to-br from-sky-400 to-blue-500 shadow-sky-500/30' :
                                         'bg-gradient-to-br from-red-400 to-rose-500 shadow-red-500/30'
                                     ]">
-                                        <ClockIcon v-if="option.icon === 'clock'" class="w-6 h-6 text-white" />
-                                        <CurrencyDollarIcon v-else-if="option.icon === 'currency'" class="w-6 h-6 text-white" />
-                                        <CheckCircleIcon v-else-if="option.icon === 'check'" class="w-6 h-6 text-white" />
-                                        <XCircleIcon v-else class="w-6 h-6 text-white" />
+                                        <Clock v-if="option.icon === 'clock'" class="w-6 h-6 text-white" />
+                                        <DollarSign v-else-if="option.icon === 'currency'" class="w-6 h-6 text-white" />
+                                        <CheckCircle v-else-if="option.icon === 'check'" class="w-6 h-6 text-white" />
+                                        <XCircle v-else class="w-6 h-6 text-white" />
                                     </div>
                                     <div class="flex-1">
                                         <span class="font-bold block text-gray-800">{{ option.label }}</span>
                                         <span class="text-xs text-gray-500">{{ option.description }}</span>
                                     </div>
                                     <div v-if="statusForm.status === option.value" class="text-indigo-500">
-                                        <CheckCircleSolidIcon class="w-7 h-7" />
+                                        <CheckCircle2 class="w-7 h-7" />
                                     </div>
                                 </button>
                             </div>
@@ -522,10 +522,10 @@ const statusOptions = [
                         <!-- Payment Proof Upload (for paid/completed) -->
                         <div v-if="requiresPaymentProof" class="space-y-3">
                             <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                <PhotoIcon class="w-5 h-5" />
+                                <Image class="w-5 h-5" />
                                 Upload Bukti Pembayaran <span class="text-red-500">*</span>
                             </label>
-                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 transition-all duration-300 cursor-pointer group">
+                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-muted transition-all duration-300 cursor-pointer group">
                                 <input
                                     ref="fileInputRef"
                                     type="file"
@@ -537,14 +537,14 @@ const statusOptions = [
                                 <label for="payment-proof-input" class="cursor-pointer block">
                                     <div v-if="!statusForm.payment_proof" class="text-gray-500">
                                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-100 transition-colors">
-                                            <ArrowUpTrayIcon class="w-8 h-8 text-gray-400 group-hover:text-indigo-500" />
+                                            <Upload class="w-8 h-8 text-gray-400 group-hover:text-indigo-500" />
                                         </div>
                                         <p class="text-sm font-medium">Klik untuk upload gambar</p>
                                         <p class="text-xs text-gray-400 mt-1">JPG, PNG, max 5MB</p>
                                     </div>
                                     <div v-else class="text-emerald-600">
                                         <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <CheckCircleSolidIcon class="w-8 h-8" />
+                                            <CheckCircle2 class="w-8 h-8" />
                                         </div>
                                         <p class="text-sm font-semibold">{{ statusForm.payment_proof.name }}</p>
                                         <p class="text-xs text-gray-400 mt-1">Klik untuk ganti</p>
@@ -552,7 +552,7 @@ const statusOptions = [
                                 </label>
                             </div>
                             <p v-if="selectedOrder?.payment_proof_path" class="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-                                <CheckCircleIcon class="w-4 h-4" />
+                                <CheckCircle class="w-4 h-4" />
                                 Bukti pembayaran sudah ada sebelumnya
                             </p>
                         </div>
@@ -560,7 +560,7 @@ const statusOptions = [
                         <!-- Cancellation Reason (for cancelled) -->
                         <div v-if="requiresCancellationReason" class="space-y-3">
                             <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                <PencilSquareIcon class="w-5 h-5" />
+                                <PenSquare class="w-5 h-5" />
                                 Alasan Pembatalan <span class="text-red-500">*</span>
                             </label>
                             <textarea
@@ -581,7 +581,7 @@ const statusOptions = [
                         <button
                             @click="submitStatusChange"
                             :disabled="statusForm.processing || !isFormValid"
-                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-indigo-500/30"
+                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-primary text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-indigo-500/30"
                         >
                             {{ statusForm.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
@@ -599,7 +599,7 @@ const statusOptions = [
                 <div class="bg-white rounded-3xl w-full max-w-sm text-center shadow-2xl animate-scale-in">
                     <div class="p-8">
                         <div class="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-500/30 animate-pulse">
-                            <BellAlertIcon class="w-12 h-12 text-white" />
+                            <Bell class="w-12 h-12 text-white" />
                         </div>
                         <h3 class="text-2xl font-bold text-gray-800 mb-2">Waktu Pengambilan Tiba!</h3>
                         <p class="text-gray-600 mb-6">
@@ -607,7 +607,7 @@ const statusOptions = [
                         </p>
                         <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
                             <p class="text-sm text-amber-800 flex items-center justify-center gap-2 font-medium">
-                                <SparklesIcon class="w-5 h-5" />
+                                <Sparkles class="w-5 h-5" />
                                 Segera konfirmasi status order ini.
                             </p>
                         </div>
@@ -621,7 +621,7 @@ const statusOptions = [
                         </button>
                         <button
                             @click="confirmFromNotification"
-                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-indigo-500/30"
+                            class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-primary text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-primary transition-all duration-200 shadow-lg shadow-indigo-500/30"
                         >
                             Konfirmasi Status
                         </button>

@@ -1,3 +1,310 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   POSITA - THREE PERSONA THEMING SYSTEM
+   ============================================
+   - :root = Employee (Light, Emerald Green)
+   - .dark = Admin (Dark, Violet)
+   - .theme-neutral = Guest/Auth (Light, Orange)
+   ============================================ */
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* ----------------------------------------
+       EMPLOYEE THEME (Default Light)
+       Fresh - Emerald Green Primary
+       ---------------------------------------- */
+
+    /* Core */
+    --background: 152 81% 96%;
+    /* emerald-50 #ecfdf5 */
+    --foreground: 222 47% 11%;
+    /* slate-900 */
+
+    /* Primary: Emerald Green */
+    --primary: 161 94% 30%;
+    /* emerald-600 #059669 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Light Gray */
+    --secondary: 210 40% 96%;
+    /* slate-200 #e2e8f0 */
+    --secondary-foreground: 222 47% 11%;
+
+    /* Accent: Orange */
+    --accent: 25 95% 53%;
+    /* orange-500 #f97316 */
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Cards & Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Sidebar */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-hover: 152 30% 95%;
+
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 161 94% 30%;
+    /* Emerald ring */
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  /* ----------------------------------------
+     ADMIN THEME (Dark Mode)
+     Professional - Violet Primary
+     ---------------------------------------- */
+  .dark {
+    /* Core */
+    --background: 222 47% 4%;
+    /* slate-950 #020617 */
+    --foreground: 210 40% 98%;
+    /* slate-50 */
+
+    /* Primary: Violet */
+    --primary: 263 70% 50%;
+    /* violet-600 #7c3aed */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Dark Gray */
+    --secondary: 217 33% 17%;
+    /* slate-800 #1e293b */
+    --secondary-foreground: 210 40% 98%;
+
+    /* Accent: Emerald */
+    --accent: 160 84% 39%;
+    /* emerald-500 #10b981 */
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Cards & Surfaces */
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 7%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Sidebar */
+    --sidebar: 222 47% 7%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-hover: 217 33% 17%;
+
+    /* Borders & Inputs */
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 263 70% 50%;
+    /* Violet ring */
+
+    /* Destructive */
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  /* ----------------------------------------
+     NEUTRAL THEME (Guest/Auth Pages)
+     Warm - Orange Primary, Green Secondary
+     ---------------------------------------- */
+  .theme-neutral {
+    /* Core */
+    --background: 210 40% 98%;
+    /* slate-50 */
+    --foreground: 222 47% 11%;
+    /* slate-900 */
+
+    /* Primary: Orange */
+    --primary: 25 95% 53%;
+    /* orange-500 #f97316 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Emerald Green */
+    --secondary: 161 94% 30%;
+    /* emerald-600 #059669 */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent: Violet */
+    --accent: 258 90% 66%;
+    /* violet-500 #8b5cf6 */
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Cards & Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Sidebar (Not used in guest) */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-hover: 210 40% 96%;
+
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 25 95% 53%;
+    /* Orange ring */
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  /* Base Styles */
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+
+  /* ----------------------------------------
+     GLASSMORPHISM UTILITIES
+     ---------------------------------------- */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/30;
+  }
+
+  .dark .glass {
+    @apply bg-slate-900/70 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-dark {
+    @apply bg-black/30 backdrop-blur-md border border-white/10;
+  }
+
+  /* ----------------------------------------
+     CARD HOVER EFFECTS
+     ---------------------------------------- */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply shadow-lg;
+    transform: translateY(-4px);
+  }
+
+  /* ----------------------------------------
+     BUTTON MICRO-INTERACTIONS
+     ---------------------------------------- */
+  .btn-press:active {
+    transform: scale(0.98);
+  }
+
+  .active-press {
+    @apply transition-transform duration-150 ease-out;
+  }
+
+  .active-press:active {
+    transform: scale(0.95);
+  }
+
+  /* Bouncy Cart Animation */
+  .animate-bouncy {
+    animation: bouncy 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Success Pulse */
+  .animate-success-glow {
+    animation: success-glow 0.6s ease-out;
+  }
+
+  /* ----------------------------------------
+     STAGGER ANIMATIONS
+     ---------------------------------------- */
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.4s;
+  }
+
+  .stagger-5 {
+    animation-delay: 0.5s;
+  }
+
+  /* ----------------------------------------
+     SAFE AREA INSETS (iOS/Android)
+     ---------------------------------------- */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* ----------------------------------------
+     SCROLLBAR STYLING
+     ---------------------------------------- */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-muted rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer utilities {
+  .animate-fill-forwards {
+    animation-fill-mode: forwards;
+  }
+
+  .animate-fill-backwards {
+    animation-fill-mode: backwards;
+  }
+
+  .animate-fill-both {
+    animation-fill-mode: both;
+  }
+}

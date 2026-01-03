@@ -1,0 +1,26 @@
+<script setup>
+import { DropdownMenuItem } from 'radix-vue'
+import { cn } from '@/lib/utils'
+
+defineProps({
+  disabled: Boolean,
+  destructive: Boolean,
+  class: String,
+})
+</script>
+
+<template>
+  <DropdownMenuItem
+    :disabled="disabled"
+    :class="cn(
+      'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
+      'focus:bg-accent focus:text-accent-foreground',
+      'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      destructive && 'text-destructive focus:bg-destructive/10 focus:text-destructive',
+      $props.class
+    )"
+    v-bind="$attrs"
+  >
+    <slot />
+  </DropdownMenuItem>
+</template>
